@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+
+  /* Custom Breakpoints */
+  --breakpoint-xsm: 0px;
+  --breakpoint-sm: 480px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  --breakpoint-notes-xsm: 320px;
+  --breakpoint-notes-sm: 595px;
+  --breakpoint-notes-md: 768px;
+  --breakpoint-notes-lg: 1024px;
+  --breakpoint-notes-xl: 1300px;
+}
