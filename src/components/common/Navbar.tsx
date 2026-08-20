@@ -1,6 +1,8 @@
-import { Bell, ChevronDown, Activity,FolderOpenDot, GlobeCheck, Search, Settings, TextQuote, UserRoundArrowLeft } from "lucide-react"
+import { Bell, ChevronDown, Activity, FolderOpenDot, GlobeCheck, Search, Settings, TextQuote, UserRoundArrowLeft } from "lucide-react"
 import SearchBar from "./SearchBar"
 import { useLocation, useNavigate } from "react-router-dom";
+import Logout from "../Auth/Logout";
+import useImage from "@/Hooks/useImage";
 
 
 const sideBarList1 = [
@@ -32,17 +34,19 @@ const sideBarList1 = [
         name: "Settings",
         path: "/settings",
         icon: Settings
-    },{
-        name:"/profile",
-        path:"/profile",
-        icon:UserRoundArrowLeft 
+    }, {
+        name: "/profile",
+        path: "/profile",
+        icon: UserRoundArrowLeft
     }
 
 ];
 function Navbar() {
     const navigate = useNavigate();
     const pathname = useLocation();
-    console.log("pathname", pathname.pathname)
+
+    const {imageUrl} = useImage();
+    
 
     const getDynamicLogo = () => {
         const currentPath = pathname.pathname;
@@ -105,19 +109,22 @@ function Navbar() {
                     <Settings
                         size={15}
                         className="cursor-pointer"
-                        onClick={()=>{navigate('/settings')}}
+                        onClick={() => { navigate('/settings') }}
                     />
                     <Bell
                         size={15}
                         className="cursor-pointer"
-                          onClick={()=>{navigate('/notifications')}}
+                        onClick={() => { navigate('/notifications') }}
                     />
-                    <div className="w-6 h-6 flex justify-between justify-center  rounded-full bg-gray-500 cursor-pointer"
+                    <Logout />
+                    <div className="w-6 h-6 flex  justify-between justify-center  rounded-full bg-gray-500 cursor-pointer"
                         onClick={() => {
                             navigate('/profile')
                         }}
                     >
-                        <p className="cursor-pointer m-auto text-[10px]">ZA</p>
+                        <img className="cursor-pointer m-auto  rounded-full"
+                        src={imageUrl}
+                        />
                     </div>
 
                 </div>

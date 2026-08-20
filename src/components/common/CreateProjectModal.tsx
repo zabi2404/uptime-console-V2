@@ -1,8 +1,14 @@
+
 import { X } from "lucide-react";
-import {  useState } from "react";
-// import { useDispatch } from "react-redux";
-// import { type AppDispatch } from "../../redux/store";
-// import { createProject } from "../../redux/Projects/ProjectSlice";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { type AppDispatch, type RootState } from "../../redux/store";
+import { createProject } from "../../redux/Projects/ProjectSlice";
+import Button from "./Buttons/Button";
+import { toast } from "react-toastify";
+import { useTestUrl } from "@/Hooks/useTestUrl";
+import { useMonitoring } from "@/Hooks/useMontioring";
 
 interface CreateProjectModalProps {
     isOpen: boolean;
@@ -13,32 +19,98 @@ export default function CreateProjectModal({
     isOpen,
     onClose,
 }: CreateProjectModalProps) {
+    type ProjectStatus = "ACTIVE" | "DOWN";
 
+    interface ProjectForm {
+        userId: string;
+        projectID: string;
+        name: string;
+        url: string;
+        status: ProjectStatus;
+    }
+    const { user } = useSelector((state: RootState) => state.user)
 
-
-    const [form, setForm] = useState(
+    const [form, setForm] = useState<ProjectForm>(
         {
-            projectID: "",
+            userId: user?.id || "",
+            projectID: crypto.randomUUID(),
             name: "",
             url: "",
-            status: "active",
-            // Enable: false
+            status: "ACTIVE",
         }
     )
-// const dispatch = useDispatch<AppDispatch>();
+    const dispatch = useDispatch<AppDispatch>();
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const { createlog } = useMonitoring();
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // dispatch(createProject(form));
+        dispatch(createProject(form));
+        setForm((prev) => ({
+            ...prev,
+            userId: user?.id || "",
+            projectID: crypto.randomUUID(),
+            name: "",
+            url: "",
+            status: "ACTIVE",
+        }))
+
         onClose();
-       
+        await createlog({
+            userId: user?.id || "",
+            title: `Project ${form.name} created`,
+            message: `Project ${form.name} with ID ${form.projectID} created.`,
+            tags: "CREATED",
+            createdAt: new Date().toISOString(),
+        });
+        
+
     }
+
+    // const [loading, setLoading] = useState(false);
+
+    const { testUrl, loading, error } = useTestUrl()
+    const testConnection = async () => {
+        if (form.url === "") {
+            toast.error("Please enter a URL");
+            return;
+        }
+        if (!form.url.startsWith("http://") && !form.url.startsWith("https://")) {
+            toast.error("Please enter a valid URL starting with http:// or https://");
+            return;
+        }
+
+        const data = await testUrl(form.url);
+
+        toast.success(`Status Code: ${data?.statusCode}, Message: ${data?.message}`);
+        if (error) {
+            toast.error(`Error: ${error}`);
+            console.error(error);
+            return;
+        }
+
+        console.log(data);
+    };
+
+
+
+    const closeModal = () => {
+        setForm((prev) => ({
+            ...prev,
+            userId: user?.id || "",
+            name: "",
+            url: "",
+            status: "ACTIVE",
+        }))
+        onClose();
+    };
+
 
     if (!isOpen) return null;
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-            onClick={onClose}
+            onClick={closeModal}
         >
             <div
                 className="w-full max-w-[520px] rounded-xl border border-gray-200 bg-white shadow-2xl"
@@ -57,7 +129,7 @@ export default function CreateProjectModal({
                     </div>
 
                     <button
-                        onClick={onClose}
+                        onClick={closeModal}
                         className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-800"
                     >
                         <X size={20} />
@@ -66,7 +138,7 @@ export default function CreateProjectModal({
 
                 {/* Form */}
                 <form className="space-y-5 px-6 py-6"
-                onSubmit={handleSubmit}
+                    onSubmit={handleSubmit}
                 >
                     {/* Project ID */}
                     <div>
@@ -78,7 +150,8 @@ export default function CreateProjectModal({
                             type="text"
                             placeholder="e.g. health-check"
                             value={form.projectID}
-                            onChange={(e) => setForm(({ ...form, projectID: e.target.value }))}
+                            disabled={true}
+                            // onChange={(e) => setForm(({ ...form, projectID: e.target.value }))}
                             className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                         />
                     </div>
@@ -100,46 +173,33 @@ export default function CreateProjectModal({
 
                     {/* URL */}
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-800">
-                            URL
-                        </label>
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="  flex items-center text-sm font-medium text-gray-800">
+                                URL
+                            </label>
+                            <div onClick={testConnection}>
+                                <Button
+                                    name="Test URL"
+                                    variant="secondary"
+                                    loading={loading}
+                                />
+
+                            </div>
+                        </div>
 
                         <input
                             type="url"
                             value={form.url}
                             placeholder="https://example.com"
-                            onChange={(e) => setForm({ ...form, url: e.target.value })}
+                            onChange={(e) => setForm(({ ...form, url: e.target.value }))}
                             className="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
                         />
                     </div>
-                    <div className="flex items-center justify-between rounded-lg  px-4 py-3">
-                        <div>
-                            <h3 className="text-sm font-semibold text-gray-900">
-                                Keep Track
-                            </h3>
+                    <div className="w-ful px-4 py-3">
 
-                            <p className="mt-1 text-xs text-gray-500">
-                                Monitor your project’s uptime and status automatically.
-                            </p>
-                        </div>
 
-                        <label className="relative inline-flex shrink-0 cursor-pointer items-center">
-                            <input
-                                type="checkbox"
-                                checked={true}
-                                onChange={(e) =>
-                                    setForm((prev) => ({
-                                        ...prev,
-                                        Enable: e.target.checked,
-                                    }))
-                                }
-                                className="peer sr-only"
-                            />
 
-                            <div className="h-6 w-11 rounded-full bg-gray-200 transition-colors duration-200 peer-checked:bg-[#1B76E2]" />
 
-                            <div className="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
-                        </label>
                     </div>
                     {/* Actions */}
                     <div className="flex justify-end gap-3 border-t border-gray-200 pt-5">
@@ -154,8 +214,8 @@ export default function CreateProjectModal({
                         <button
                             type="submit"
                             className="h-10 rounded-lg bg-blue-600 px-5 text-sm font-medium text-white transition hover:bg-blue-700"
-                       
-                       >
+
+                        >
                             Create Project
                         </button>
                     </div>

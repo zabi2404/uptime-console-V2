@@ -1,30 +1,36 @@
 
-import axios from "axios";
+import { checkUrl } from "../shared/checkUrl";
 
 
-// const client = new DynamoDBClient({
-//   region: "us-east-1"
-// });
-// const db = DynamoDBDocumentClient.from(client);
+export const handler = async (event: { arguments: { url: string } }) => {
 
-export const handler = async (event: { url: string }) => {
+  const url = event.arguments.url;
 
-  const url = event.url;
-  
+  if (!url) {
+    return {
+      statusCode: 400,
+      message: JSON.stringify({
+        message: "URL is required",
+      }),
+      date: new Date().toISOString(),
+      responseTime: "0 ms",
+    };
+  }
+
   try {
-const response = await axios.get(url);
-console.log("reponse from axios",response.data);
+    return await checkUrl(url);
+  } catch (error: unknown) {
+    console.error("Error in Lambda:", error);
 
-if(response.data === "PONG" || response.status === 200) {
-  return {
-    statusCode: 200,
-    message: JSON.stringify({ message: "Server is running!" }),
+    return {
+      statusCode: 500,
+      message: JSON.stringify({
+        message: "Server is down or request failed",
+      }),
+      date: new Date().toISOString(),
+      responseTime: "0 ms",
+    };
   };
 }
 
-  return response;
- } catch (error) {
-  console.log(error);
- }
-
-};
+// https://keep2-d798.onrender.com/ping

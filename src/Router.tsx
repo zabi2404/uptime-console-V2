@@ -6,6 +6,10 @@ import VersionPage from "./components/common/VersionPage";
 import Profile from "./pages/Profile/Profile";
 import Login from "./pages/Auth/Login";
 import Signup from "./pages/Auth/Signup";
+import ForgetPassword from "./components/Auth/ForgetPassword";
+import ProtectedRoute from "./ProtectedRoutes";
+import NotificationsPage from "./pages/Notification/Notification";
+import ActivityPage from "./pages/Domains/ActivityPage";
 
 interface ProviderWrapperProps {
     children: React.ReactNode;
@@ -34,55 +38,81 @@ const router = createBrowserRouter([
             {
                 path: "/",
                 element: (
-                    <Overview />
+                    <ProtectedRoute>
+                        <Overview />
+                    </ProtectedRoute>
                 ),
             },
             {
                 path: "/domains",
                 element: (
-                    <VersionPage />
+                       <ProtectedRoute>
+                           <ActivityPage />
+                       </ProtectedRoute>
                 ),
             },
             {
                 path: "/Projects",
                 element: (
-                    <VersionPage />
+                       <ProtectedRoute>
+                           <VersionPage />
+                       </ProtectedRoute>
                 ),
             },
             {
                 path: "/activity",
                 element: (
-                    <VersionPage />
+                       <ProtectedRoute>
+                           <VersionPage />
+                       </ProtectedRoute>
                 ),
             },
             {
                 path: "/notifications",
                 element: (
-                    <VersionPage />
+                       <ProtectedRoute>
+                           <NotificationsPage />
+                       </ProtectedRoute>
                 ),
             },
             {
                 path: "/settings",
                 element: (
-                    <VersionPage />
+                       <ProtectedRoute>
+                          <Profile />
+                       </ProtectedRoute>
                 ),
             },
             {
                 path: "/profile",
                 element: (
-                    <Profile />
+                       <ProtectedRoute>
+                           <Profile />
+                       </ProtectedRoute>
                 ),
             },
             {
                 path: "/login",
                 element: (
-                    <Login />
+                       <ProtectedRoute protected={false}>
+                           <Login />
+                       </ProtectedRoute>
                 ),
             },
             {
                 path: "/signUp",
                 element: (
-                    <Signup />
+                       <ProtectedRoute protected={false}>
+                           <Signup />
+                       </ProtectedRoute>
+                ),
+            },
+            {
+                path: "/forgot-password",  
+                element: (
+                       <ProtectedRoute protected={false}>
+                           <ForgetPassword />
+                       </ProtectedRoute>
                 ),
             },
             {

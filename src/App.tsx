@@ -3,7 +3,8 @@ import router from "./Router"
 import { NavbarProvider } from "./context/NavbarContext"
 import { ModalProvider } from "./context/ModalContext"
 import { ToastContainer } from "react-toastify"
-
+import { Provider } from "react-redux"
+import { store } from "./redux/store"
 
 function App() {
 
@@ -12,16 +13,18 @@ function App() {
     <>
       <NavbarProvider>
         <ModalProvider>
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            closeOnClick
-            pauseOnHover
-            draggable
-            theme="light"
-          />
-          <RouterProvider router={router} />
+          <Provider store={store}>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              closeOnClick
+              pauseOnHover
+              draggable
+              theme="light"
+            />
+            <RouterProvider router={router} />
+          </Provider>
         </ModalProvider>
       </NavbarProvider>
     </>

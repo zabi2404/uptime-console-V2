@@ -1,20 +1,29 @@
 interface ButtonProps {
     name: string
-    variant?: "primary" | "danger"
+    variant?: "primary" | "danger" | "secondary"
+    loading?: boolean
     disableButton?:boolean
+    onClick?: () => void
+    type?: "button" | "submit" 
 }
 
-function Button({ name, variant = "primary", disableButton =false }: ButtonProps) {
+function Button({ name, variant = "primary", disableButton =false, onClick , type = "button",loading }: ButtonProps) {
     const styles =
     variant === "danger"
     ? "border-red-300 text-red-600 hover:bg-red-50"
+    : variant === "secondary"
+    ? "border-[#047D95] text-[#047D95] hover:bg-gray-50"
     : "border-[#1B76E2] text-[#1B76E2] hover:bg-blue-50"
     
    
     return (
       
-            <button className={`${styles} cursor-pointer border py-1 px-4 border-[#1B76E2] border-[1.5px] rounded-[25px] styles text-[12px] font-semibold disabled:cursor-not-allowed disabled:text-gray-600 disabled:border-gray-600 disabled:hover:bg-white disabled:hover:none `} disabled={disableButton}>
-                {name}
+            <button className={`${styles} cursor-pointer border py-1 px-4 border-[#1B76E2] border-[1.5px] rounded-[25px] styles text-[12px] font-semibold disabled:cursor-not-allowed disabled:text-gray-600 disabled:border-gray-600 disabled:hover:bg-white disabled:hover:none `} disabled={disableButton}
+            onClick={onClick}
+            type={type}
+            >
+                
+                {loading ? "Loading..." : name}
             </button>
       
     )
