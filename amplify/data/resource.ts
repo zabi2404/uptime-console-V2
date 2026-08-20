@@ -1,7 +1,7 @@
-import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
-import { testUrl } from '../functions/testUrl/resource';
-import { checkAllProjects } from '../functions/checkAllProjects/resources';
-import { sendNotification } from '../functions/sendNotification/resources';
+import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
+import { testUrl } from "../functions/testUrl/resource";
+import { checkAllProjects } from "../functions/checkAllProjects/resources";
+import { sendNotification } from "../functions/sendNotification/resources";
 
 /*== STEP 1 ===============================================================
 The section below creates a Todo database table with a "content" field. Try
@@ -10,8 +10,8 @@ specifies that any unauthenticated user can "create", "read", "update",
 and "delete" any "Todo" records.
 =========================================================================*/
 const schema = a.schema({
-  UptimeProjects: a.
-    model({
+  UptimeProjects: a
+    .model({
       userId: a.string().required(),
       projectID: a.string().required(),
       status: a.enum(["ACTIVE", "DOWN"]),
@@ -20,27 +20,37 @@ const schema = a.schema({
       responseTime: a.string(),
       lastChecked: a.datetime(),
     })
-    .authorization((allow) => [allow.owner()]),
+    .authorization((allow) => allow.owner()),
 
-  UserProfile: a.model({
-    name: a.string(),
-    email: a.string(),
-    phoneNumber: a.string(),
-    companyName: a.string(),
-    websiteUrl: a.string(),
-    address: a.string(),
-  })
-    .authorization((allow) => [allow.owner()]),
+  UserProfile: a
+    .model({
+      name: a.string(),
+      email: a.string(),
+      phoneNumber: a.string(),
+      companyName: a.string(),
+      websiteUrl: a.string(),
+      address: a.string(),
+    })
+    .authorization((allow) => allow.owner()),
 
-  MonitoringLog: a.model({
-    userId: a.string().required(),
-    title: a.string().required(),
-    message: a.string().required(),
-    tags: a.enum(['CREATED', 'UPDATED', 'DELETED', 'ALERT', 'NOTIFICATION','SETTING_CHANGED','FAILED','OTHER']),
-    createdAt: a.datetime().required(),
-  })
-    .authorization((allow) => [allow.owner()]),
-
+  MonitoringLog: a
+    .model({
+      userId: a.string().required(),
+      title: a.string().required(),
+      message: a.string().required(),
+      tags: a.enum([
+        "CREATED",
+        "UPDATED",
+        "DELETED",
+        "ALERT",
+        "NOTIFICATION",
+        "SETTING_CHANGED",
+        "FAILED",
+        "OTHER",
+      ]),
+      createdAt: a.datetime().required(),
+    })
+    .authorization((allow) => allow.owner()),
 
   //Lambda functions
 
@@ -51,7 +61,8 @@ const schema = a.schema({
     responseTime: a.string().required(),
   }),
 
-  sendNotification: a.mutation()
+  sendNotification: a
+    .mutation()
     .arguments({
       userId: a.string().required(),
       channel: a.enum(["EMAIL", "SMS", "WEBHOOK"]),
@@ -66,42 +77,33 @@ const schema = a.schema({
         success: a.boolean().required(),
         channel: a.string(),
         body: a.string().required(),
-      })
+      }),
     )
     .handler(a.handler.function(sendNotification))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ]),
+    .authorization((allow) => allow.authenticated()),
 
-
-  testUrl: a.query()
+  testUrl: a
+    .query()
     .arguments({
       url: a.string().required(),
     })
     .returns(a.ref("TestUrlResponse"))
-    .authorization((allow) => [
-      allow.authenticated(),
-    ])
+    .authorization((allow) => allow.authenticated())
     .handler(a.handler.function(testUrl)),
-})
+});
 
-
-
-
-
-  //Permissions
-  .authorization((allow) => [
-    allow.resource(checkAllProjects),
-  ]);
-;
+// Permissions
+const authorizedSchema = schema.authorization((allow) => [
+  allow.resource(checkAllProjects),
+]);
 
 export type Schema = ClientSchema<typeof schema>;
 
 export const data = defineData({
   name: "UptimeConsole",
-  schema,
+  schema: authorizedSchema,
   authorizationModes: {
-    defaultAuthorizationMode: 'userPool',
+    defaultAuthorizationMode: "userPool",
   },
 });
 
